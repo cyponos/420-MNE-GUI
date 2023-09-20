@@ -1,7 +1,11 @@
-import mne.io
+# import mne.io
 from django.shortcuts import render, redirect
+from rest_framework.views import APIView
 from .forms import EEGDataUploadForm
 from .models import UploadedFile
+from .models import *
+from rest_framework.response import Response
+from . serializer import *
 from django . shortcuts import get_object_or_404
 from .models import EEGData
 import os, tempfile
@@ -43,3 +47,19 @@ def delete_file(request, file_id):
         file_to_delete.eeg_file.delete()
         file_to_delete.delete()
     return redirect('file_list')
+
+class ReactView(APIView):
+    
+    serializer_class = ReactSerializer
+  
+    def get(self, request):
+        detail = [ {"name": detail.name,"detail": detail.detail} 
+        for detail in React.objects.all()]
+        return Response(detail)
+  
+    def post(self, request):
+  
+        serializer = ReactSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return  Response(serializer.data)
