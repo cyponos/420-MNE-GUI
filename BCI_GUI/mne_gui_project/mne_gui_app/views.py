@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from . serializer import *
 from django . shortcuts import get_object_or_404
 from .models import EEGData
+from rest_framework import status
 import os, tempfile
 
 
@@ -56,6 +57,14 @@ class ReactView(APIView):
         detail = [ {"name": detail.name,"detail": detail.detail} 
         for detail in React.objects.all()]
         return Response(detail)
+    
+    def delete(self, request, pk):
+        try:
+            item = React.objects.get(pk=pk)
+            item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except React.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
   
     def post(self, request):
   
