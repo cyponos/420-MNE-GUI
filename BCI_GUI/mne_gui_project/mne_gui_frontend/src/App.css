@@ -1,0 +1,53 @@
+html, body, #root {
+  height: 100%;
+}
+
+.App {
+  text-align: center;
+  height: 100%;
+}
+
+.app-container {
+  background-color: #e0e0e0;
+  width: 100vw;
+  height: 100vh;
+  padding-left: auto;
+  padding-right: auto;
+  justify-content: center;
+  text-align: center;
+}
+
+.body-content {
+  margin-top: 25px;
+  border: solid black;
+  border-radius: 15px;
+  background-color: white;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  width: auto;
+  display: flex;
+  height: 85vh;
+}
+
+.flex-column {
+  flex: 1;
+  padding: 15px;
+  min-height: 150px;
+  width: 45vw;
+}
+
+.flex-column:first-child {
+  margin-right: 20px;
+}
+
+.flex-selection {
+  padding: 5px;
+  border: solid black;
+  border-radius: 15px;
+  min-height: 35vh;
+}
+
+.flex-selection:first-child {
+  margin-bottom: 20px;
+}

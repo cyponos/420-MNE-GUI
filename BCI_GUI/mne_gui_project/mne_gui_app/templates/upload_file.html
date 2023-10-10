@@ -1,0 +1,18 @@
+<!DOCTYTPE html>
+<html>
+    <div style="text-align: center;">
+        <head>
+            <title>Upload EDF File</title>
+        </head>
+        <body>
+            <h1>Upload EDF File</h1>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Upload File</button>
+            </form>
+        <br> <br>
+        <a href="/home.html"> Back to Home </a>
+        </body>
+    </div>
+</html>
