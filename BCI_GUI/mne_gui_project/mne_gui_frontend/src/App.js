@@ -1,9 +1,9 @@
 import React from 'react';
 import axios from 'axios';
-import Header from './components/HeaderBar/Header.js';
-import './App.css';
-
 import { useEffect, useState } from 'react';
+import Header from './components/HeaderBar/Header.js';
+import FileUpload from './components/FileUpload/FileUpload.js';
+import './App.css';
 
 function App() {
   const [data, setData] = useState([]);
@@ -54,8 +54,11 @@ function App() {
           <div className="flex-column">
             <div className="flex-selection">
               File Selection
+              {/***** FILE UPLOAD *****/}
+              <FileUpload />
 
               {/* TEST FUNC */}
+              {/*}
               <form onSubmit={handleSubmit}>
                 <input
                   type="text"
@@ -72,7 +75,7 @@ function App() {
                   onChange={handleChange}
                 />
                 <button type="submit">Submit</button>
-              </form>
+              </form>*/}
 
               {/* Render data from the API */}
               <ul>
