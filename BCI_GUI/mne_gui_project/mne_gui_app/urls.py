@@ -1,9 +1,15 @@
-from django.urls import path
+from django.urls import path, include
 from mne_gui_app.views import *
+from rest_framework.routers import DefaultRouter
+from .views import EEGDataViewSet
 from . import views
+
+router = DefaultRouter()
+router.register('files', EEGDataViewSet, basename='files')
 
 urlpatterns = [
 
+    path('api/', include(router.urls)),
     path('', views.ReactView.as_view(), name="react-view"),
     path('upload_file', views.upload_file, name='upload_file'),
     path('file_list/', views.file_list, name='file_list'),

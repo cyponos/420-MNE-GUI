@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from mne_gui_app.views import *
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('eeg/', include('mne_gui_app.urls')),
     path('', include('mne_gui_app.urls')),
+    path("admin/", admin.site.urls),
     path('wel/', ReactView.as_view(), name="something"),
-]
+] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from . serializer import *
 from django . shortcuts import get_object_or_404
 from .models import EEGData
-from rest_framework import status
+from rest_framework import status, viewsets
 import os, tempfile
 
 
@@ -72,3 +72,7 @@ class ReactView(APIView):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return  Response(serializer.data)
+        
+class EEGDataViewSet(viewsets.ModelViewSet):
+    queryset = EEGData.objects.all()
+    serializer_class = EEGDataSerializer

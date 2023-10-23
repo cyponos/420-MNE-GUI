@@ -4,60 +4,55 @@ import { useEffect, useState } from 'react';
 
 function FileUpload() {
 
-  const [data, setData] = useState([]);
-  const [formData, setFormData] = useState({ name: '', detail: '' });
+  const [ file, setFile ] = useState(null);
+  const [ progress, setProgress ] = useState({ started: false, pc: 0 });
+  const [ msg, setMsg ] = useState(null);
 
-  useEffect(() => {
-    // Making a GET request to retrieve data
-    axios.get('http://localhost:8000/')
-      .then((response) => setData(response.data))
-      .catch((error) => console.error('Error:', error));
-  }, []);
+  function handleUpload() {
+    if (!file) {
+      setMsg("No file selected");
+      return;
+    }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    const fd = new FormData();
+    fd.append('file', file);
 
-    // Making a POST request to send data
-    axios.post('http://localhost:8000/', formData)
-      .then((response) => {
-        console.log('Data sent successfully:', response.data);
-        // Optionally, reset the form or update the state as needed
-        setFormData({ name: '', detail: '' });
-      })
-      .catch((error) => console.error('Error:', error));
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleDelete = (itemId) => {
-    // Making a DELETE request to delete an entry
-    axios.delete(`http://localhost:8000/ReactView/${itemId}/`)
-      .then((response) => {
-        console.log('Response:', response);
-        console.log('Entry deleted successfully:', response.data);
-        // Optionally, update the state to remove the deleted entry
-        setData((prevData) => prevData.filter((item) => item.id !== itemId));
-      })
-      .catch((error) => console.error('Error:', error));
+    setMsg("Uploading...");
+    setProgress(prevState => {
+      return {...prevState, started: true}
+    });
+    axios.post('http://127.0.0.1:8000/', fd, {
+      onUploadProgress: (progressEvent) => { setMsg(prevState => {
+        return { ...prevState, pc: progressEvent.progress*100 }
+      }) },
+      headers: {
+        "Custom-Header": "value",
+      }
+    })
+    .then(res => {
+      setMsg("Upload Successful");
+      console.log(res.data);
+    })
+    .catch(err => {
+      setMsg("Upload Failed");
+      console.error(err);
+    });
   };
 
   return (
     <div className="file-upload-container">
       <div className="file-upload">
-        <form onSubmit={handleSubmit}>
+        <form>
           <input 
             type="file"
-            name="file"
-            value={formData.file}
-            onChange={handleChange}
+            onChange={ (e) => { setFile(e.target.files[0]) } }
           />
-          <button>
+          <button onClick={ handleUpload }>
             Submit
           </button>
         </form>
+        { progress.started && <progress max="100" value={progress.pc}></progress> }
+        { msg && <span>{msg}</span> }
       </div>
     </div>
   );
