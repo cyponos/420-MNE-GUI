@@ -1,16 +1,50 @@
-<!DOCTYTPE html>
+<!DOCTYPE html>
 <html>
-    <div style="text-align: center;">
-        <head>
-            <title>Home Page</title>
-        </head>
-        <body>
-            <h1>This is the homepage</h1>
-                <ul>
-                    <a href="http://127.0.0.1:8000/eeg/upload_file">Upload File</a>
-                    <br> <br> <br>
-                    <a href="http://127.0.0.1:8000/eeg/file_list">View Files</a>
-                </ul>
-        </body>
-    </div>
+<head>
+    <title>Home Page</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #888888;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            display: inline-block;
+            margin: 20px;
+        }
+
+        a.button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>We are the Airheads</h1>
+    <img src="/media/IMG_4478.jpg" width="150" height="150">
+    <ul>
+        <li><a href="http://127.0.0.1:8000/eeg/upload_file" class="button">Upload File</a></li>
+        <li><a href="http://127.0.0.1:8000/eeg/file_list" class="button">View Files</a></li>
+        <li><a href="{% url 'filter_data' eeg_data_id=1 %}" class="button">Filter Data</a></li>
+        <li><a href="http://127.0.0.1:8000/graph/9/" class="button"> Sample Graph</a></li>
+    </ul>
+</body>
 </html>

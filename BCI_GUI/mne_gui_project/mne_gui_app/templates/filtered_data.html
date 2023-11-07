@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Filtered EEG Data</title>
+     <style>
+       body {
+           text-align: center;
+           background-color: WHITE;
+       }
+       a.button {
+           display: inline-block;
+           padding: 10px 20px;
+           background-color: #007bff;
+           color: #fff;
+           text-decoration: none;
+           border-radius: 5px;
+       }
+   </style>
+    <!-- Include Plotly library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Filtered EEG Data</h1>
+    <pre> {{ filtered_data }}</pre>
+
+    <!-- Add a container for the Plotly graph -->
+    <div id="filtered-data-graph"></div>
+
+ <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Retrieve the filtered data from the context (assuming it's a JSON string)
+        var filteredData = JSON.parse('{{ filtered_data|safe }}');
+
+        // Extract the time and EEG values from the filtered data (modify these based on your data structure)
+        var time = filteredData.time; // Replace with your time data key
+        var eegValues = filteredData.eeg_values; // Replace with your EEG data key
+
+        // Create a Plotly trace for the EEG data
+        var eegTrace = {
+            x: time,
+            y: eegValues,
+            mode: 'lines',
+            name: 'EEG Data'
+        };
+
+        // Create a layout for the graph
+        var layout = {
+            title: 'Filtered EEG Data',
+            xaxis: {
+                title: 'Time (ms)'
+            },
+            yaxis: {
+                title: 'EEG Value'
+            }
+        };
+
+        // Create the graph
+        Plotly.newPlot('filtered-data-graph', [eegTrace], layout);
+    });
+</script>
+
+    <br><br>
+    <a href="/" class="button">Back to Home</a>
+</body>
+</html>

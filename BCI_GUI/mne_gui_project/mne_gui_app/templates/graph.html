@@ -1,0 +1,153 @@
+<!-- graph.html -->
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Graph Page</title>
+   <style>
+       body {
+           text-align: center;
+           background-color: WHITE;
+       }
+
+
+       h1 {
+           margin-top: 20px;
+       }
+
+
+       ul {
+           list-style: none;
+           padding: 0;
+       }
+
+
+       ul li {
+           display: inline-block;
+           margin: 20px;
+       }
+
+
+       a.button {
+           display: inline-block;
+           padding: 10px 20px;
+           background-color: #007bff;
+           color: #fff;
+           text-decoration: none;
+           border-radius: 5px;
+       }
+   </style>
+</head>
+<body>
+   <div id="eeg-graph-container">
+       {% for channel_name in channel_names %}
+           <div id="eeg-graph-{{ channel_name }}"></div>
+       {% endfor %}
+   </div>
+
+
+ <!-- EEG leads checkboxes -->
+<div>
+   <label>Select EEG Leads:</label>
+   <label><input type="checkbox" id="select-all" value="All Channels">Select All</label>
+   {% for channel_name in channel_names %}
+       <label><input type="checkbox" class="select-channel" value="{{ channel_name }}">{{ channel_name }}</label>
+   {% endfor %}
+</div>
+
+
+<!-- Add an empty div for the Plotly graph -->
+<div id="eeg-graph-container"></div>
+
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+   var eegData = {{ eeg_data_json|safe }};
+   var channelNames = Object.keys(eegData);
+
+
+   var layout = {
+       title: 'EEG Data Over Time',
+       xaxis: {
+           title: 'Time (ms)'
+       },
+       yaxis: {
+           title: 'EEG Value (uV)',
+           autorange: true
+       },
+   };
+
+
+   var xData = eegData['x'];
+
+
+   var traces = [];
+
+
+   for (var i = 0; i < channelNames.length; i++) {
+       var channelName = channelNames[i];
+
+
+       if (channelName === 'x') {
+           continue;
+       }
+
+
+       var channelData = eegData[channelName];
+
+
+       var sanitizedChannelName = channelName.replace(/[^a-zA-Z0-9-_]/g, '_');
+
+
+       var eegTrace = {
+           x: xData,
+           y: channelData,
+           mode: 'lines',
+           name: channelName
+       };
+
+
+       traces.push(eegTrace);
+   }
+
+
+   // Create the initial plot
+   Plotly.newPlot('eeg-graph-container', traces, layout);
+
+
+   // Add event listeners for the checkboxes
+   document.getElementById('select-all').addEventListener('change', selectAllChannels);
+   var channelCheckboxes = document.querySelectorAll('.select-channel');
+   channelCheckboxes.forEach(function(checkbox) {
+       checkbox.addEventListener('change', updateGraph);
+   });
+
+
+   function selectAllChannels() {
+       var checkboxes = document.querySelectorAll('.select-channel');
+       checkboxes.forEach(function(checkbox) {
+           checkbox.checked = this.checked;
+       });
+       updateGraph();
+   }
+
+
+   function updateGraph() {
+       var selectedChannels = ['x'];
+
+
+       channelCheckboxes.forEach(function(checkbox) {
+           if (checkbox.checked) {
+               selectedChannels.push(checkbox.value);
+           }
+       });
+
+
+       var updatedTraces = traces.filter(trace => selectedChannels.includes(trace.name));
+       Plotly.newPlot('eeg-graph-container', updatedTraces, layout);
+   }
+</script>
+
+
+<a href="http://127.0.0.1:8000/" class="button">Back to Home</a>
+</body>
+</html>
