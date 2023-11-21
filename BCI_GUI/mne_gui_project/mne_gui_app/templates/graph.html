@@ -2,41 +2,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-   <title>Graph Page</title>
-   <style>
-       body {
-           text-align: center;
-           background-color: WHITE;
-       }
+    <title>Graph Page</title>
+    <style>
+        * {
+            font-family: Arial, sans-sarif;
+            padding: 0px;
+            margin: 0px;
+        }
 
+        .checkbox-container {
+            color: #f2f2f2;
+            background-color: black;
+            padding: 15px;
+            border-bottom: solid #62626d 4px;
+            border-top: solid #62626d 4px;
+            width: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+        body {
+            text-align: center;
+            background-color: #343541;
+        }
 
-       h1 {
-           margin-top: 20px;
-       }
+        .header-container {
+            background-color: black;
+            padding: 15px;
+            border-bottom: solid #62626d 4px;
+        }
 
+        h1 {
+            color: #f2f2f2;
+        }
 
-       ul {
-           list-style: none;
-           padding: 0;
-       }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
 
+        ul li {
+            display: inline-block;
+            margin: 20px;
+        }
 
-       ul li {
-           display: inline-block;
-           margin: 20px;
-       }
+        .select-channel {
+            margin: 10px;
+        }
 
+        a.button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 5px;
+            outline: none;
+            font: inherit;
+            appearance: none;
+            border: none;
+            cursor: pointer;
+        }
 
-       a.button {
-           display: inline-block;
-           padding: 10px 20px;
-           background-color: #007bff;
-           color: #fff;
-           text-decoration: none;
-           border-radius: 5px;
-       }
-   </style>
+        a.button:hover {
+            background-color: #343541;
+            color: white;
+            transition: 0.3s;
+        }
+    </style>
 </head>
+<div class="header-container">
+    <h1>Plotly Graph</h1>
+</div>
 <body>
    <div id="eeg-graph-container">
        {% for channel_name in channel_names %}
@@ -46,7 +86,7 @@
 
 
  <!-- EEG leads checkboxes -->
-<div>
+<div class="checkbox-container">
    <label>Select EEG Leads:</label>
    <label><input type="checkbox" id="select-all" value="All Channels">Select All</label>
    {% for channel_name in channel_names %}
@@ -148,6 +188,6 @@
 </script>
 
 
-<a href="http://127.0.0.1:8000/" class="button">Back to Home</a>
+<a href="http://127.0.0.1:8000/" class="button">Return to Homepage</a>
 </body>
 </html>
