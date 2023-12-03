@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="executionMode" value="BINARY" />
     <option name="pathToExecutable" value="C:\Users\jonwi\anaconda3\Scripts\black.exe" />
-    <option name="sdkUUID" value="65b499a8-ce09-4150-8fff-90fa081bdee3" />
+    <option name="sdkName" value="Python 3.9 (BCI_GUI) (2)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (BCI_GUI) (2)" project-jdk-type="Python SDK" />
 </project>

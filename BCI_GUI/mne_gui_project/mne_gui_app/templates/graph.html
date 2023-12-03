@@ -1,42 +1,82 @@
-<!-- graph.html -->
 <!DOCTYPE html>
 <html>
 <head>
-   <title>Graph Page</title>
-   <style>
-       body {
-           text-align: center;
-           background-color: WHITE;
-       }
+    <title>Graph Page</title>
+    <style>
+        * {
+            font-family: Arial, sans-sarif;
+            padding: 0px;
+            margin: 0px;
+        }
 
+        .checkbox-container {
+            color: #f2f2f2;
+            background-color: black;
+            padding: 15px;
+            border-bottom: solid #62626d 4px;
+            border-top: solid #62626d 4px;
+            width: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+        body {
+            text-align: center;
+            background-color: #343541;
+        }
 
-       h1 {
-           margin-top: 20px;
-       }
+        .header-container {
+            background-color: black;
+            padding: 15px;
+            border-bottom: solid #62626d 4px;
+        }
 
+        h1 {
+            color: #f2f2f2;
+        }
 
-       ul {
-           list-style: none;
-           padding: 0;
-       }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
 
+        ul li {
+            display: inline-block;
+            margin: 20px;
+        }
 
-       ul li {
-           display: inline-block;
-           margin: 20px;
-       }
+        .select-channel {
+            margin: 10px;
+        }
 
+        a.button, button.button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 5px;
+            outline: none;
+            font: inherit;
+            appearance: none;
+            border: none;
+            cursor: pointer;
+        }
 
-       a.button {
-           display: inline-block;
-           padding: 10px 20px;
-           background-color: #007bff;
-           color: #fff;
-           text-decoration: none;
-           border-radius: 5px;
-       }
-   </style>
+        a.button:hover {
+            background-color: #343541;
+            color: white;
+            transition: 0.3s;
+        }
+    </style>
 </head>
+<div class="header-container">
+    <h1>Plotly Graph</h1>
+</div>
+
 <body>
    <div id="eeg-graph-container">
        {% for channel_name in channel_names %}
@@ -44,18 +84,15 @@
        {% endfor %}
    </div>
 
-
- <!-- EEG leads checkboxes -->
-<div>
+<div class="checkbox-container">
    <label>Select EEG Leads:</label>
    <label><input type="checkbox" id="select-all" value="All Channels">Select All</label>
    {% for channel_name in channel_names %}
        <label><input type="checkbox" class="select-channel" value="{{ channel_name }}">{{ channel_name }}</label>
    {% endfor %}
 </div>
+    <button id="applyICABtn" class="button">Apply ICA Preprocessing</button>
 
-
-<!-- Add an empty div for the Plotly graph -->
 <div id="eeg-graph-container"></div>
 
 
@@ -109,12 +146,8 @@
        traces.push(eegTrace);
    }
 
-
-   // Create the initial plot
    Plotly.newPlot('eeg-graph-container', traces, layout);
 
-
-   // Add event listeners for the checkboxes
    document.getElementById('select-all').addEventListener('change', selectAllChannels);
    var channelCheckboxes = document.querySelectorAll('.select-channel');
    channelCheckboxes.forEach(function(checkbox) {
@@ -123,14 +156,15 @@
 
 
    function selectAllChannels() {
-       var checkboxes = document.querySelectorAll('.select-channel');
-       checkboxes.forEach(function(checkbox) {
-           checkbox.checked = this.checked;
-       });
-       updateGraph();
-   }
+    var selectAllCheckbox = document.getElementById('select-all');
+    var checkboxes = document.querySelectorAll('.select-channel');
 
+    checkboxes.forEach(function(checkbox) {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
 
+    updateGraph();
+}
    function updateGraph() {
        var selectedChannels = ['x'];
 
@@ -145,9 +179,65 @@
        var updatedTraces = traces.filter(trace => selectedChannels.includes(trace.name));
        Plotly.newPlot('eeg-graph-container', updatedTraces, layout);
    }
+
+        document.getElementById('applyICABtn').addEventListener('click', function() {
+    var eegDataId = 9;
+
+    fetch(`/apply_ica_preprocessing/${eegDataId}/`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('ICA preprocessing applied successfully');
+            var updatedEEGData = data.eeg_data_ica_json;
+
+            updateGraphWithData(updatedEEGData);
+        })
+        .catch(error => {
+            console.error('Error applying ICA preprocessing:', error);
+        });
+});
+
+   function updateGraphWithData(updatedEEGData) {
+    var channelNames = Object.keys(updatedEEGData);
+    var layout = {
+        title: 'EEG Data Over Time',
+        xaxis: {
+            title: 'Time (ms)'
+        },
+        yaxis: {
+            title: 'EEG Value (uV)',
+            autorange: true
+        },
+    };
+
+    var xData = updatedEEGData['x'];
+    var traces = [];
+
+    for (var i = 0; i < channelNames.length; i++) {
+        var channelName = channelNames[i];
+
+        if (channelName === 'x') {
+            continue;
+        }
+
+        var channelData = updatedEEGData[channelName];
+
+        var sanitizedChannelName = channelName.replace(/[^a-zA-Z0-9-_]/g, '_');
+
+        var eegTrace = {
+            x: xData,
+            y: channelData,
+            mode: 'lines',
+            name: channelName
+        };
+
+        traces.push(eegTrace);
+    }
+
+    Plotly.newPlot('eeg-graph-container', traces, layout);
+}
 </script>
 
-
-<a href="http://127.0.0.1:8000/" class="button">Back to Home</a>
+<br>
+<a href="http://127.0.0.1:8000/" class="button">Return to Homepage</a>
 </body>
 </html>

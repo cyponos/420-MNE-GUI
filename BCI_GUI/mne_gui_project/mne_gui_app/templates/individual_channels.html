@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Individual Channel Page</title>
+    <style>
+        * {
+            font-family: Arial, sans-sarif;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        body {
+            text-align: center;
+            background-color: #343541;
+        }
+
+        .header-container {
+            background-color: black;
+            padding: 15px;
+            border-bottom: solid #62626d 4px;
+        }
+
+        h1 {
+            color: #f2f2f2;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            display: inline-block;
+            margin: 20px;
+        }
+
+        .select-channel {
+            margin: 10px;
+        }
+
+        a.button, button.button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 5px;
+            outline: none;
+            font: inherit;
+            appearance: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        a.button:hover {
+            background-color: #343541;
+            color: white;
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<div class="header-container">
+    <h1>Individual Channels Graph</h1>
+</div>
+
+<body>
+   <div id="eeg-graph-container">
+       {% for channel_name in channel_names %}
+           <div id="eeg-graph-{{ channel_name }}"></div>
+       {% endfor %}
+   </div>
+   <br>
+
+    <button id="applyICABtn" class="button">Apply ICA Preprocessing</button>
+
+    <br>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+   var eegData = {{ eeg_data_json|safe }};
+var channelNames = Object.keys(eegData);
+
+for (var i = 0; i < channelNames.length; i++) {
+    var channelName = channelNames[i];
+
+    if (channelName === 'x') {
+        continue;
+    }
+
+    var channelData = eegData[channelName];
+
+    var layout = {
+        title: channelName + ' EEG Data Over Time',
+        xaxis: {
+            title: 'Time (ms)'
+        },
+        yaxis: {
+            title: 'EEG Value (uV)',
+            autorange: true
+        },
+    };
+
+    var xData = eegData['x'];
+
+    var trace = {
+        x: xData,
+        y: channelData,
+        mode: 'lines',
+        name: channelName
+    };
+
+    var graphDivId = 'eeg-graph-' + channelName;
+
+    Plotly.newPlot(graphDivId, [trace], layout);
+}
+
+   document.getElementById('applyICABtn').addEventListener('click', function() {
+    var eegDataId = 9;
+
+    fetch(`/apply_ica_preprocessing/${eegDataId}/`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('ICA preprocessing applied successfully');
+            var updatedEEGData = data.eeg_data_json;
+
+            updateGraphWithData(updatedEEGData);
+        })
+        .catch(error => {
+            console.error('Error applying ICA preprocessing:', error);
+        });
+});
+
+</script>
+
+<br>
+<a href="http://127.0.0.1:8000/" class="button">Return to Homepage</a>
+</body>
+</html>

@@ -3,63 +3,139 @@
 <head>
     <title>Filtered EEG Data</title>
      <style>
-       body {
-           text-align: center;
-           background-color: WHITE;
-       }
-       a.button {
-           display: inline-block;
-           padding: 10px 20px;
-           background-color: #007bff;
-           color: #fff;
-           text-decoration: none;
-           border-radius: 5px;
-       }
-   </style>
-    <!-- Include Plotly library -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        * {
+            font-family: Arial, sans-sarif;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        #filtered-data-graph {
+            margin: 0 auto;
+            width: 80%;
+        }
+
+        .checkbox-container {
+            color: #f2f2f2;
+            background-color: black;
+            padding: 15px;
+            border-bottom: solid #62626d 4px;
+            border-top: solid #62626d 4px;
+            width: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 25px;
+            display: inline-block;
+        }
+        body {
+            text-align: center;
+            background-color: #343541;
+        }
+
+        .header-container {
+            background-color: black;
+            padding: 15px;
+            border-bottom: solid #62626d 4px;
+        }
+
+        h1 {
+            color: #f2f2f2;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            display: inline-block;
+            margin: 20px;
+        }
+
+        .select-channel {
+            margin: 10px;
+        }
+
+        a.button, button.button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 5px;
+            outline: none;
+            font: inherit;
+            appearance: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        a.button:hover {
+            background-color: #343541;
+            color: white;
+            transition: 0.3s;
+        }
+    </style>
+   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <h1>Filtered EEG Data</h1>
-    <pre> {{ filtered_data }}</pre>
 
-    <!-- Add a container for the Plotly graph -->
     <div id="filtered-data-graph"></div>
 
- <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Retrieve the filtered data from the context (assuming it's a JSON string)
-        var filteredData = JSON.parse('{{ filtered_data|safe }}');
+    <br>
+    <button id="applyICABtn" class="button">Apply ICA Preprocessing</button>
 
-        // Extract the time and EEG values from the filtered data (modify these based on your data structure)
-        var time = filteredData.time; // Replace with your time data key
-        var eegValues = filteredData.eeg_values; // Replace with your EEG data key
+     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var filteredData = JSON.parse('{{ filtered_data|safe }}');
 
-        // Create a Plotly trace for the EEG data
-        var eegTrace = {
-            x: time,
-            y: eegValues,
-            mode: 'lines',
-            name: 'EEG Data'
-        };
+            var time = filteredData.time;
+            var channels = Object.keys(filteredData).filter(key => key !== 'time');
 
-        // Create a layout for the graph
-        var layout = {
-            title: 'Filtered EEG Data',
-            xaxis: {
-                title: 'Time (ms)'
-            },
-            yaxis: {
-                title: 'EEG Value'
-            }
-        };
+            var traces = [];
 
-        // Create the graph
-        Plotly.newPlot('filtered-data-graph', [eegTrace], layout);
-    });
-</script>
+            channels.forEach(function(channel) {
+                var eegValues = filteredData[channel];
+
+                var eegTrace = {
+                    x: time,
+                    y: eegValues,
+                    mode: 'lines',
+                    name: channel
+                };
+
+                traces.push(eegTrace);
+            });
+
+            var layout = {
+                title: 'Filtered EEG Data',
+                xaxis: {
+                    title: 'Time (ms)'
+                },
+                yaxis: {
+                    title: 'EEG Value'
+                }
+            };
+
+            Plotly.newPlot('filtered-data-graph', traces, layout);
+        });
+
+         document.getElementById('applyICABtn').addEventListener('click', function() {
+            var eegDataId = 9;
+
+            fetch(`/apply_ica_preprocessing/${eegDataId}/`)
+                .then(response => {
+                    console.log('ICA preprocessing applied successfully');
+                })
+                .catch(error => {
+                    console.error('Error applying ICA preprocessing:', error);
+                });
+        });
+    </script>
 
     <br><br>
-    <a href="/" class="button">Back to Home</a>
+    <a href="/" class="button">Back Home</a>
 </body>
 </html>

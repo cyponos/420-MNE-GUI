@@ -1,4 +1,5 @@
 import mne.io
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from .forms import EEGDataUploadForm
 from .models import UploadedFile
@@ -12,6 +13,8 @@ import io
 import base64
 import json
 import pandas as pd
+import numpy as np
+import plotly.graph_objs as go
 
 
 def filter_data(request, eeg_data_id):
@@ -27,11 +30,17 @@ def filter_data(request, eeg_data_id):
 
         filtered_data = raw.to_data_frame()
 
-        # Convert the DataFrame to a list of dictionaries (JSON serializable format)
-        filtered_data_list = filtered_data.to_dict(orient='records')
+        time_data = filtered_data['time'].tolist()
+
+        eeg_channels_data = filtered_data.drop(columns='time').to_dict(orient='list')
+
+        filtered_data_dict = {
+            'time': time_data,
+            **eeg_channels_data
+        }
 
         context = {
-            'filtered_data': json.dumps(filtered_data_list),  # Convert to JSON
+            'filtered_data': json.dumps(filtered_data_dict),
         }
 
         return render(request, 'filtered_data.html', context)
@@ -72,29 +81,51 @@ def make_graph(request, eeg_data_id):
     eeg_data = get_object_or_404(EEGData, pk=eeg_data_id)
     eeg_file_name = eeg_data.eeg_file.path
 
-    # Read EEG data using MNE
     raw = mne.io.read_raw_edf(eeg_file_name)
     eeg_data = raw.to_data_frame()
 
-    # Get channel names and convert data to a JSON-friendly format
     channel_names = eeg_data.columns.tolist()
     eeg_data_dict = {
-        'x': eeg_data.index.tolist(),  # Replace with actual time data if available
+        'x': eeg_data.index.tolist(),
     }
 
     for channel_name in channel_names:
         eeg_data_dict[channel_name] = eeg_data[channel_name].tolist()
 
-    # Convert the data to a JSON string
     eeg_data_json = json.dumps(eeg_data_dict)
 
     context = {
         'eeg_data_json': eeg_data_json,
-        'channel_names': channel_names,  # Pass channel names for graph container creation
+        'channel_names': channel_names,
         'raw_data_head': raw.to_data_frame().head(),
     }
 
     return render(request, 'graph.html', context)
+
+def make_channel_graph(request, eeg_data_id):
+    eeg_data = get_object_or_404(EEGData, pk=eeg_data_id)
+    eeg_file_name = eeg_data.eeg_file.path
+
+    raw = mne.io.read_raw_edf(eeg_file_name)
+    eeg_data = raw.to_data_frame()
+
+    channel_names = eeg_data.columns.tolist()
+    eeg_data_dict = {
+        'x': eeg_data.index.tolist(),
+    }
+
+    for channel_name in channel_names:
+        eeg_data_dict[channel_name] = eeg_data[channel_name].tolist()
+
+    eeg_data_json = json.dumps(eeg_data_dict)
+
+    context = {
+        'eeg_data_json': eeg_data_json,
+        'channel_names': channel_names,
+        'raw_data_head': raw.to_data_frame().head(),
+    }
+
+    return render(request, 'individual_channels.html', context)
 
 def upload_file(request):
     if request.method == 'POST':
@@ -119,4 +150,27 @@ def delete_file(request, file_id):
         file_to_delete.eeg_file.delete()
         file_to_delete.delete()
     return redirect('file_list')
+
+def apply_ica_preprocessing(request, eeg_data_id):
+    eeg_data = get_object_or_404(EEGData, pk=eeg_data_id)
+    eeg_file_name = eeg_data.eeg_file.path
+
+    raw = mne.io.read_raw_edf(eeg_file_name, preload=True)
+
+    ica = mne.preprocessing.ICA(n_components=20, random_state=97)
+    ica.fit(raw)
+    ica.apply(raw)
+    eeg_data = raw.to_data_frame()
+
+    channel_names = eeg_data.columns.tolist()
+    eeg_data_dict = {
+        'x': eeg_data.index.tolist(),
+    }
+
+    for channel_name in channel_names:
+        eeg_data_dict[channel_name] = eeg_data[channel_name].tolist()
+
+    eeg_data_ica_json = json.dumps(eeg_data_dict)
+
+    return JsonResponse({'message': 'ICA preprocessing applied successfully', 'eeg_data_ica_json': eeg_data_ica_json})
 
